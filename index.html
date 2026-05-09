@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#fafaf7">
+<title>BrokeTheCycle — Food</title>
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>○</text></svg>">
+<style>
+/* ============================================
+   DESIGN TOKENS
+   ============================================ */
+:root {
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --surface-2: #f3f1ea;
+  --border: #e5e2d8;
+  --border-strong: #c9c5b6;
+  --text: #1a1a1a;
+  --text-2: #6b6b6b;
+  --text-3: #999996;
+  --accent: #1a1a1a;
+  --accent-soft: #efece3;
+  --danger: #a32d2d;
+  --danger-soft: #f5e6e6;
+  --success: #3b6d11;
+  --success-soft: #e8f0de;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.08);
+  --day-boundary-hour: 4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15140f;
+    --surface: #1f1e18;
+    --surface-2: #28261e;
+    --border: #34322a;
+    --border-strong: #4d4a3f;
+    --text: #f0eee5;
+    --text-2: #a8a59a;
+    --text-3: #6b6960;
+    --accent: #f0eee5;
+    --accent-soft: #2a2820;
+    --danger: #d4605e;
+    --danger-soft: #2e1f1f;
+    --success: #6fad3a;
+    --success-soft: #1e2a14;
+    --shadow: 0 1px 3px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  }
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-bottom: 100px;
+  position: relative;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+header {
+  padding: 1.5rem 1.25rem 0.5rem;
+}
+
+.brand {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ============================================
+   SCREENS
+   ============================================ */
+.screen {
+  display: none;
+  padding: 0 1.25rem;
+}
+
+.screen.active {
+  display: block;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   BOTTOM NAV
+   ============================================ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  z-index: 100;
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.5rem 0;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-btn.active { color: var(--text); }
+.nav-btn svg { width: 22px; height: 22px; }
+
+/* ============================================
+   TODAY SCREEN
+   ============================================ */
+.day-count-card {
+  text-align: center;
+  padding: 2rem 1rem;
+  margin-top: 1rem;
+}
+
+.day-count-number {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.day-count-label {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-top: 0.25rem;
+}
+
+/* Dot grid */
+.dot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+  padding: 1.25rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+.dot-grid-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.dot-grid-nav {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.dot-grid-nav:active { background: var(--surface-2); }
+.dot-grid-nav:disabled { opacity: 0.2; pointer-events: none; }
+
+.dot-grid-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  flex: 1;
+}
+
+.dot-grid-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.dot.sober { background: var(--success); border-color: var(--success); }
+.dot.smoked { background: var(--danger); border-color: var(--danger); }
+.dot.today { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--text-3); }
+.dot.future { opacity: 0.3; }
+
+/* Stats row */
+.stats-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.stat-card {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* Quick log buttons */
+.quick-log {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.quick-log-btn {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text);
+}
+
+.quick-log-btn:active { transform: scale(0.97); }
+.quick-log-btn.smoke-free { border-color: var(--success); color: var(--success); background: var(--success-soft); }
+.quick-log-btn.smoked { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
+
+/* ============================================
+   CRAVING BUTTON
+   ============================================ */
+.craving-section {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.craving-btn {
+  width: 100%;
+  padding: 1.25rem;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: var(--shadow-md);
+}
+
+.craving-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+/* ============================================
+   PROTOCOL FLOW — shared
+   ============================================ */
+.protocol-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 200;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.protocol-screen.active { display: flex; flex-direction: column; }
+
+.protocol-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  flex-shrink: 0;
+}
+
+.protocol-step-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.protocol-exit {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.875rem;
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.protocol-exit:active { background: var(--surface-2); }
+
+.protocol-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1.25rem;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.protocol-title {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.protocol-subtitle {
+  font-size: 14px;
+  color: var(--text-2);
+  text-align: center;
+  margin-bottom: 2rem;
+  max-width: 320px;
+}
+
+/* ============================================
+   STEP 0 — INTENSITY SNAPSHOT
+   ============================================ */
+.intensity-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.intensity-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.intensity-btn:active { transform: scale(0.92); }
+.intensity-btn.selected {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+/* ============================================
+   STEP 1 — MOTIVATION ANCHOR
+   ============================================ */
+.motivation-card {
+  text-align: center;
+  max-width: 320px;
+}
+
+.motivation-validation {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+
+.motivation-anchor {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text-2);
+  font-weight: 400;
+}
+
+.motivation-go-btn {
+  width: 100%;
+  max-width: 280px;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 2.5rem;
+  transition: all 0.15s;
+}
+
+.motivation-go-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+/* ============================================
+   STEP 2 — BREATHE
+   ============================================ */
+.breathe-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.breathe-circle-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.breathe-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 3px solid var(--border-strong);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 4s ease-in-out, border-color 0.5s;
+}
+
+.breathe-circle.inhale {
+  transform: scale(1.25);
+  border-color: var(--success);
+}
+
+.breathe-circle.hold {
+  transform: scale(1.25);
+  border-color: var(--text-3);
+}
+
+.breathe-circle.exhale {
+  transform: scale(1);
+  border-color: var(--accent);
+}
+
+.breathe-phase-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: opacity 0.3s;
+}
+
+.breathe-phase-count {
+  font-size: 3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-top: 4px;
+  color: var(--text);
+}
+
+.breathe-time-remaining {
+  font-size: 13px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.breathe-cycle-count {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 0.25rem;
+}
+
+.breathe-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 280px;
+}
+
+.breathe-action-btn {
+  width: 100%;
+  padding: 0.875rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text);
+  transition: all 0.15s;
+  display: none;
+}
+
+.breathe-action-btn:active { transform: scale(0.97); }
+.breathe-action-btn.visible { display: block; }
+
+.breathe-action-btn.primary {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+/* ============================================
+   STEP 2 — NAME IT
+   ============================================ */
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.chip {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.12s;
+  font-weight: 500;
+}
+
+.chip:active { transform: scale(0.95); }
+.chip.selected {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.protocol-next-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all 0.15s;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.protocol-next-btn.enabled {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.protocol-next-btn:active { transform: scale(0.97); }
+
+/* ============================================
+   STEP 3 — MOVE
+   ============================================ */
+.move-timer-display {
+  font-size: 4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--text);
+  margin: 1.5rem 0;
+  line-height: 1;
+}
+
+.move-instruction {
+  font-size: 14px;
+  color: var(--text-2);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* ============================================
+   STEP 4 — REFLECT
+   ============================================ */
+.reflect-delta {
+  text-align: center;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: var(--success-soft);
+  border: 1px solid var(--success);
+}
+
+.reflect-delta-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.reflect-delta-label {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-top: 2px;
+}
+
+.reflect-note {
+  width: 100%;
+  max-width: 320px;
+  min-height: 80px;
+  padding: 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  resize: vertical;
+  margin-top: 1rem;
+}
+
+.reflect-note::placeholder { color: var(--text-3); }
+
+.protocol-finish-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: var(--success);
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all 0.15s;
+}
+
+.protocol-finish-btn:active { transform: scale(0.97); }
+
+/* ============================================
+   JOURNAL SCREEN
+   ============================================ */
+.journal-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-3);
+  font-size: 14px;
+}
+
+.journal-entry {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.journal-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.journal-entry-time {
+  font-size: 13px;
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+.journal-entry-intensity {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.journal-entry-intensity.dropped {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.journal-entry-intensity.same {
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+
+.journal-entry-trigger {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.journal-entry-note {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-top: 0.375rem;
+}
+
+.journal-entry-actions {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 0.375rem;
+}
+
+/* ============================================
+   TRACKER SCREEN
+   ============================================ */
+.tracker-section {
+  margin-top: 1.5rem;
+}
+
+.tracker-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.75rem;
+}
+
+.tracker-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.tracker-bar-label {
+  font-size: 13px;
+  color: var(--text-2);
+  width: 90px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.tracker-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.tracker-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+.tracker-bar-count {
+  font-size: 12px;
+  color: var(--text-3);
+  width: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tracker-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.tracker-action-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-2);
+  transition: all 0.15s;
+}
+
+.tracker-action-btn:active { background: var(--surface-2); }
+.tracker-action-btn.danger { color: var(--danger); border-color: var(--danger); }
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.text-center { text-align: center; }
+.hidden { display: none !important; }
+
+</style>
+</head>
+<body>
+
+<!-- ==========================================
+     HEADER
+     ========================================== -->
+<header>
+  <div class="brand">BrokeTheCycle — Food</div>
+</header>
+
+<!-- ==========================================
+     TODAY SCREEN
+     ========================================== -->
+<div id="screen-today" class="screen active">
+  <div class="day-count-card">
+    <div class="day-count-number" id="heroNumber">0</div>
+    <div class="day-count-label" id="heroLabel">cravings survived</div>
+  </div>
+
+  <div class="dot-grid" id="dotGrid">
+    <div class="dot-grid-header">
+      <button class="dot-grid-nav" id="dotGridPrev" onclick="changeMonth(-1)">‹</button>
+      <div class="dot-grid-title" id="dotGridTitle">May — 0 of 0 days on plan</div>
+      <button class="dot-grid-nav" id="dotGridNext" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="dot-grid-dots" id="dotGridDots"></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value" id="statCravingsToday">0</div>
+      <div class="stat-label">Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statCravingsWeek">0</div>
+      <div class="stat-label">This week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statAvgIntensity">—</div>
+      <div class="stat-label">Avg drop</div>
+    </div>
+  </div>
+
+  <div class="quick-log">
+    <button class="quick-log-btn smoke-free" onclick="logDay('sober')">Stayed on plan</button>
+    <button class="quick-log-btn smoked" onclick="logDay('smoked')">Slipped</button>
+  </div>
+
+  <div class="craving-section">
+    <button class="craving-btn" onclick="startProtocol()">I'm having a craving</button>
+  </div>
+</div>
+
+<!-- ==========================================
+     JOURNAL SCREEN
+     ========================================== -->
+<div id="screen-journal" class="screen">
+  <h2 style="font-size:18px; font-weight:700; margin-top:1rem;">Craving Log</h2>
+  <div id="journalList" style="margin-top:1rem;"></div>
+</div>
+
+<!-- ==========================================
+     TRACKER SCREEN
+     ========================================== -->
+<div id="screen-tracker" class="screen">
+  <h2 style="font-size:18px; font-weight:700; margin-top:1rem;">Patterns</h2>
+  <div class="stats-row mt-1">
+    <div class="stat-card">
+      <div class="stat-value" id="trackerTotal">0</div>
+      <div class="stat-label">Total cravings</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="trackerSurvived">0</div>
+      <div class="stat-label">Survived</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="trackerSmokeFree">0</div>
+      <div class="stat-label">Days on plan</div>
+    </div>
+  </div>
+
+  <div class="tracker-section">
+    <div class="tracker-section-title">Top Triggers</div>
+    <div id="trackerTriggers"></div>
+  </div>
+
+  <div class="tracker-section">
+    <div class="tracker-section-title">What Helped</div>
+    <div id="trackerActions"></div>
+  </div>
+
+  <div class="tracker-actions">
+    <button class="tracker-action-btn" onclick="exportData()">Export JSON</button>
+    <button class="tracker-action-btn danger" onclick="confirmReset()">Reset all data</button>
+  </div>
+</div>
+
+<!-- ==========================================
+     BOTTOM NAV
+     ========================================== -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="switchScreen('today')" id="nav-today">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Today
+  </button>
+  <button class="nav-btn" onclick="switchScreen('journal')" id="nav-journal">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    Journal
+  </button>
+  <button class="nav-btn" onclick="switchScreen('tracker')" id="nav-tracker">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Patterns
+  </button>
+</nav>
+
+<!-- ==========================================
+     PROTOCOL: STEP 0 — INTENSITY SNAPSHOT
+     ========================================== -->
+<div id="proto-intensity" class="protocol-screen">
+  <div class="protocol-header">
+    <span class="protocol-step-label">Step 1 of 6</span>
+    <button class="protocol-exit" onclick="exitProtocol()">I'm okay now</button>
+  </div>
+  <div class="protocol-body">
+    <div class="protocol-title">How strong is it?</div>
+    <div class="protocol-subtitle">Tap the number that matches right now. Don't think — just tap.</div>
+    <div class="intensity-row" id="intensityStartRow"></div>
+  </div>
+</div>
+
+<!-- ==========================================
+     PROTOCOL: STEP 1 — MOTIVATION ANCHOR
+     ========================================== -->
+<div id="proto-motivation" class="protocol-screen">
+  <div class="protocol-header">
+    <span class="protocol-step-label">Step 2 of 6</span>
+    <button class="protocol-exit" onclick="exitProtocol()">I'm okay now</button>
+  </div>
+  <div class="protocol-body">
+    <div class="motivation-card">
+      <div class="motivation-validation">You opened this instead of giving in. That's already the hard part.</div>
+      <div class="motivation-anchor" id="motivationAnchor"></div>
+    </div>
+    <button class="motivation-go-btn" onclick="goToBreathe()">Start breathing</button>
+  </div>
+</div>
+
+<!-- ==========================================
+     PROTOCOL: STEP 2 — BREATHE
+     ========================================== -->
+<div id="proto-breathe" class="protocol-screen">
+  <div class="protocol-header">
+    <span class="protocol-step-label">Step 3 of 6</span>
+    <button class="protocol-exit" onclick="exitProtocol()">I'm okay now</button>
+  </div>
+  <div class="protocol-body">
+    <div class="breathe-container">
+      <div class="breathe-circle-wrap">
+        <div class="breathe-circle" id="breatheCircle">
+          <div class="breathe-phase-label" id="breatheLabel">Get ready</div>
+          <div class="breathe-phase-count" id="breatheCount"></div>
+        </div>
+      </div>
+      <div class="breathe-time-remaining" id="breatheTime"></div>
+      <div class="breathe-cycle-count" id="breatheCycleCount"></div>
+      <div class="breathe-actions">
+        <button class="breathe-action-btn" id="breatheReady" onclick="breatheSkip()">I'm ready</button>
+        <button class="breathe-action-btn" id="breatheMore" onclick="breatheExtend()">More breathing</button>
+        <button class="breathe-action-btn primary" id="breatheNext" onclick="breatheAdvance()">Next step</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     PROTOCOL: STEP 2 — NAME IT
+     ========================================== -->
+<div id="proto-name" class="protocol-screen">
+  <div class="protocol-header">
+    <span class="protocol-step-label">Step 4 of 6</span>
+    <button class="protocol-exit" onclick="exitProtocol()">I'm okay now</button>
+  </div>
+  <div class="protocol-body">
+    <div class="protocol-title">What triggered this?</div>
+    <div class="protocol-subtitle">Pick the closest match.</div>
+    <div class="chip-grid" id="triggerChips"></div>
+    <input type="text" id="triggerOtherInput" class="reflect-note hidden" placeholder="What triggered it?" style="min-height:auto;max-width:320px;margin-top:0.5rem;">
+    <button class="protocol-next-btn" id="nameNextBtn" onclick="goToMove()">Next</button>
+  </div>
+</div>
+
+<!-- ==========================================
+     PROTOCOL: STEP 3 — MOVE
+     ========================================== -->
+<div id="proto-move" class="protocol-screen">
+  <div class="protocol-header">
+    <span class="protocol-step-label">Step 5 of 6</span>
+    <button class="protocol-exit" onclick="exitProtocol()">I'm okay now</button>
+  </div>
+  <div class="protocol-body" id="moveBody">
+    <div class="protocol-title">Do one thing.</div>
+    <div class="protocol-subtitle">Pick one and put the phone down.</div>
+    <div class="chip-grid" id="actionChips"></div>
+    <div class="move-timer-display hidden" id="moveTimer">5:00</div>
+    <div class="move-instruction hidden" id="moveInstruction">Put the phone down. Come back when you're ready.</div>
+    <button class="protocol-next-btn hidden" id="moveSkipBtn" onclick="goToReflect()">I'm back</button>
+  </div>
+</div>
+
+<!-- ==========================================
+     PROTOCOL: STEP 4 — REFLECT
+     ========================================== -->
+<div id="proto-reflect" class="protocol-screen">
+  <div class="protocol-header">
+    <span class="protocol-step-label">Step 6 of 6</span>
+    <button class="protocol-exit" onclick="exitProtocol()">I'm okay now</button>
+  </div>
+  <div class="protocol-body">
+    <div class="protocol-title">How strong is it now?</div>
+    <div class="intensity-row" id="intensityEndRow"></div>
+    <div class="reflect-delta hidden" id="reflectDelta">
+      <div class="reflect-delta-number" id="reflectDeltaNum"></div>
+      <div class="reflect-delta-label">intensity dropped</div>
+    </div>
+    <textarea class="reflect-note" id="reflectNote" placeholder="Anything you want to remember? (optional)"></textarea>
+    <button class="protocol-finish-btn" id="reflectFinishBtn" onclick="finishProtocol()">Done</button>
+  </div>
+</div>
+
+
+<script>
+/* ============================================
+   DATA LAYER
+   ============================================ */
+const STORAGE_KEY = 'btc_food_data_v1';
+const DAY_BOUNDARY_HOUR = 4; // "Day" starts at 4:00 AM
+
+const TRIGGERS = [
+  { id: 'stress', label: 'Stress' },
+  { id: 'boredom', label: 'Boredom' },
+  { id: 'saw_food', label: 'Saw / smelled food' },
+  { id: 'emotions', label: 'Emotions' },
+  { id: 'tiredness', label: 'Tiredness' },
+  { id: 'habit', label: 'Habit / routine' },
+  { id: 'social', label: 'Social eating' },
+  { id: 'alcohol', label: 'Alcohol' },
+  { id: 'actually_hungry', label: 'Actually hungry' },
+  { id: 'no_reason', label: 'No clear reason' },
+  { id: 'other', label: 'Other' }
+];
+
+const ACTIONS = [
+  { id: 'drink_water', label: 'Drink water' },
+  { id: 'wait_15', label: 'Wait 15 min' },
+  { id: 'brush_teeth', label: 'Brush teeth' },
+  { id: 'chew_gum', label: 'Chew gum' },
+  { id: 'protein_fiber', label: 'Eat protein / fiber' },
+  { id: 'walk', label: 'Go for a walk' },
+  { id: 'change_room', label: 'Change rooms' },
+  { id: 'call_someone', label: 'Call someone' }
+];
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return getDefaultData();
+}
+
+function getDefaultData() {
+  return {
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    dayLogs: {},       // { "2026-05-09": "sober" | "smoked" }
+    cravings: [],      // array of craving objects
+    startDate: null,   // ISO string of when user started
+    version: 2
+  };
+}
+
+function saveData(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) {}
+}
+
+// Migrate from v1 if present (disabled in food version — kept separate from smoking data)
+function migrateV1() {
+  // Always: repair any corrupted startedAt / completedAt values
+  repairCravingTimestamps();
+}
+
+function repairCravingTimestamps() {
+  try {
+    const data = loadData();
+    let dirty = false;
+    data.cravings.forEach(c => {
+      // Fix startedAt
+      if (c.startedAt != null) {
+        const parsed = toValidTimestamp(c.startedAt);
+        if (parsed !== c.startedAt) { c.startedAt = parsed; dirty = true; }
+      }
+      // Fix completedAt
+      if (c.completedAt != null) {
+        const parsed = toValidTimestamp(c.completedAt);
+        if (parsed !== c.completedAt) { c.completedAt = parsed; dirty = true; }
+      }
+    });
+    if (dirty) saveData(data);
+  } catch(e) {}
+}
+
+// Convert any timestamp value to a valid ms-epoch number, or null
+function toValidTimestamp(val) {
+  if (typeof val === 'number' && !isNaN(val) && val > 946684800000) return val; // valid ms after year 2000
+  if (typeof val === 'string') {
+    // Try ISO string parse
+    const ms = Date.parse(val);
+    if (!isNaN(ms)) return ms;
+    // Try numeric string
+    const num = Number(val);
+    if (!isNaN(num) && num > 946684800000) return num;
+  }
+  return null;
+}
+
+/* ============================================
+   TIMEZONE-AWARE DATE HELPERS
+   ============================================ */
+
+// Get the "logical date" string for a given timestamp (or now).
+// A logical day runs from 4:00 AM to 3:59 AM next day.
+function getLogicalDate(timestamp) {
+  const data = loadData();
+  const tz = data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const dt = timestamp ? new Date(timestamp) : new Date();
+
+  // Get wall-clock components in user's timezone
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: 'numeric', hour12: false
+  }).formatToParts(dt);
+
+  let year, month, day, hour;
+  for (const p of parts) {
+    if (p.type === 'year') year = parseInt(p.value);
+    if (p.type === 'month') month = parseInt(p.value);
+    if (p.type === 'day') day = parseInt(p.value);
+    if (p.type === 'hour') hour = parseInt(p.value);
+  }
+
+  // If before 4 AM, this belongs to the previous calendar day
+  if (hour < DAY_BOUNDARY_HOUR) {
+    const prev = new Date(dt.getTime() - 86400000);
+    const prevParts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz,
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(prev);
+    for (const p of prevParts) {
+      if (p.type === 'year') year = parseInt(p.value);
+      if (p.type === 'month') month = parseInt(p.value);
+      if (p.type === 'day') day = parseInt(p.value);
+    }
+  }
+
+  return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+}
+
+// Get today's logical date
+function getToday() {
+  return getLogicalDate(Date.now());
+}
+
+// Get a date N logical days ago from today
+function getDateDaysAgo(n) {
+  // Work from now minus N full days. The logical date calc handles boundary.
+  const ms = Date.now() - (n * 86400000);
+  return getLogicalDate(ms);
+}
+
+// Calculate smoke-free days from dayLogs
+function getSmokeFreeCount(data) {
+  const today = getToday();
+  let count = 0;
+  // Walk backwards from yesterday (today might not be logged yet)
+  for (let i = 1; i <= 365; i++) {
+    const d = getDateDaysAgo(i);
+    const status = data.dayLogs[d];
+    if (status === 'sober') {
+      count++;
+    } else if (status === 'smoked') {
+      break; // streak broken
+    } else {
+      // No log — could mean they didn't use the app. Count as sober if startDate exists.
+      if (data.startDate && d >= data.startDate.slice(0,10)) {
+        count++;
+      } else {
+        break;
+      }
+    }
+  }
+  // Check if today is also logged sober
+  if (data.dayLogs[today] === 'sober') count++;
+  return count;
+}
+
+/* ============================================
+   SCREEN NAVIGATION
+   ============================================ */
+function switchScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+  document.getElementById(`nav-${name}`).classList.add('active');
+
+  if (name === 'today') renderToday();
+  if (name === 'journal') renderJournal();
+  if (name === 'tracker') renderTracker();
+}
+
+/* ============================================
+   TODAY SCREEN RENDER
+   ============================================ */
+// Track which month the dot grid is showing (offset from current month: 0 = this month, -1 = last month, etc.)
+let dotGridMonthOffset = 0;
+
+function renderToday() {
+  const data = loadData();
+  const today = getToday();
+
+  // Hero metric: cravings survived (completed protocol = has reflect step)
+  const survived = data.cravings.filter(c =>
+    c.stepsCompleted && c.stepsCompleted.includes('reflect')
+  ).length;
+  document.getElementById('heroNumber').textContent = survived;
+  document.getElementById('heroLabel').textContent =
+    survived === 1 ? 'craving survived' : 'cravings survived';
+
+  // Render dot grid at current offset
+  dotGridMonthOffset = 0;
+  renderDotGrid(data);
+
+  // Stats
+  const todayCravings = data.cravings.filter(c => getLogicalDate(c.startedAt) === today);
+  const weekStart = getDateDaysAgo(6);
+  const weekCravings = data.cravings.filter(c => getLogicalDate(c.startedAt) >= weekStart);
+
+  document.getElementById('statCravingsToday').textContent = todayCravings.length;
+  document.getElementById('statCravingsWeek').textContent = weekCravings.length;
+
+  // Average intensity drop
+  const completed = data.cravings.filter(c =>
+    c.intensityStart != null && c.intensityEnd != null
+  );
+  if (completed.length > 0) {
+    const avgDrop = completed.reduce((sum, c) =>
+      sum + (c.intensityStart - c.intensityEnd), 0
+    ) / completed.length;
+    document.getElementById('statAvgIntensity').textContent =
+      (avgDrop > 0 ? '−' : '') + Math.abs(avgDrop).toFixed(1);
+  } else {
+    document.getElementById('statAvgIntensity').textContent = '—';
+  }
+}
+
+function changeMonth(dir) {
+  const data = loadData();
+  dotGridMonthOffset += dir;
+  renderDotGrid(data);
+}
+
+function renderDotGrid(data) {
+  const tz = data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const today = getToday();
+
+  // Calculate target month from offset
+  const now = new Date();
+  const targetDate = new Date(now.getFullYear(), now.getMonth() + dotGridMonthOffset, 1);
+  const targetYear = targetDate.getFullYear();
+  const targetMonth = targetDate.getMonth() + 1; // 1-indexed
+  const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
+
+  // Month name
+  const monthName = targetDate.toLocaleString('en-US', { month: 'long' });
+
+  // Is this the current month?
+  const nowYear = now.getFullYear();
+  const nowMonth = now.getMonth() + 1;
+  const isCurrentMonth = (targetYear === nowYear && targetMonth === nowMonth);
+
+  // Build dots
+  const dotsContainer = document.getElementById('dotGridDots');
+  let dotsHtml = '';
+  let soberDays = 0;
+  let countableDays = 0;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${targetYear}-${String(targetMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const status = data.dayLogs[dateStr];
+    let cls = 'dot';
+
+    // Only count days up to today for current month
+    const isFuture = isCurrentMonth && dateStr > today;
+
+    if (status === 'sober') { cls += ' sober'; soberDays++; }
+    if (status === 'smoked') { cls += ' smoked'; }
+    if (dateStr === today) cls += ' today';
+    if (isFuture) cls += ' future';
+
+    if (!isFuture) countableDays++;
+
+    dotsHtml += `<div class="${cls}" title="${dateStr}"></div>`;
+  }
+
+  // For past months, countable days = all days in month
+  if (!isCurrentMonth) countableDays = daysInMonth;
+
+  // Title
+  const yearSuffix = (targetYear !== nowYear) ? ` ${targetYear}` : '';
+  const hasAnyLogs = soberDays > 0 || Object.keys(data.dayLogs).some(d => d.startsWith(`${targetYear}-${String(targetMonth).padStart(2,'0')}`));
+  const statsText = hasAnyLogs
+    ? `${soberDays} of ${countableDays} days on plan`
+    : 'No log';
+  document.getElementById('dotGridTitle').textContent =
+    `${monthName}${yearSuffix} — ${statsText}`;
+
+  dotsContainer.innerHTML = dotsHtml;
+
+  // Determine navigation bounds: allow one empty month beyond data range
+  const monthsWithData = getMonthsWithData(data);
+  const currentMonthKey = `${nowYear}-${String(nowMonth).padStart(2,'0')}`;
+  const targetMonthKey = `${targetYear}-${String(targetMonth).padStart(2,'0')}`;
+
+  // Find earliest and latest months with data
+  let earliest = currentMonthKey;
+  let latest = currentMonthKey;
+  for (const mk of monthsWithData) {
+    if (mk < earliest) earliest = mk;
+    if (mk > latest) latest = mk;
+  }
+
+  // Parse earliest/latest to calculate offset limits
+  const earliestYear = parseInt(earliest.slice(0, 4));
+  const earliestMonth = parseInt(earliest.slice(5, 7));
+  const minOffset = (earliestYear - nowYear) * 12 + (earliestMonth - nowMonth) - 1; // one extra month back
+
+  const latestYear = parseInt(latest.slice(0, 4));
+  const latestMonth = parseInt(latest.slice(5, 7));
+  const maxOffset = Math.min(0, (latestYear - nowYear) * 12 + (latestMonth - nowMonth) + 1); // one extra, capped at current
+
+  // Enable/disable nav buttons
+  document.getElementById('dotGridPrev').disabled = (dotGridMonthOffset <= minOffset);
+  document.getElementById('dotGridNext').disabled = (dotGridMonthOffset >= maxOffset);
+}
+
+function getMonthsWithData(data) {
+  const months = new Set();
+  // From dayLogs
+  for (const dateStr of Object.keys(data.dayLogs)) {
+    months.add(dateStr.slice(0, 7)); // "2026-05"
+  }
+  // From cravings
+  for (const c of data.cravings) {
+    if (c.startedAt) {
+      const d = new Date(c.startedAt);
+      const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      months.add(m);
+    }
+  }
+  return months;
+}
+
+/* ============================================
+   DAY LOGGING
+   ============================================ */
+function logDay(status) {
+  const data = loadData();
+  const today = getToday();
+  data.dayLogs[today] = status;
+  if (!data.startDate) data.startDate = new Date().toISOString();
+  saveData(data);
+  renderToday();
+}
+
+/* ============================================
+   PROTOCOL STATE
+   ============================================ */
+let proto = {
+  intensityStart: null,
+  intensityEnd: null,
+  trigger: null,
+  triggerCustom: null,
+  action: null,
+  startedAt: null,
+  breatheTimer: null,
+  breathePhase: null,
+  breathePhaseSeconds: 0,
+  breatheCycles: 0,
+  breatheTotalSeconds: 0,
+  breatheElapsed: 0,
+  breatheExtended: false,
+  breathePaused: false,
+  breatheStartedAtMs: null,
+  breatheStartedAtElapsed: 0,
+  moveTimer: null,
+  moveSeconds: 0,
+  moveEndTime: null,
+};
+
+function resetProto() {
+  if (proto.breatheTimer) clearInterval(proto.breatheTimer);
+  if (proto.moveTimer) clearInterval(proto.moveTimer);
+  proto = {
+    intensityStart: null,
+    intensityEnd: null,
+    trigger: null,
+    triggerCustom: null,
+    action: null,
+    startedAt: null,
+    breatheTimer: null,
+    breathePhase: null,
+    breathePhaseSeconds: 0,
+    breatheCycles: 0,
+    breatheTotalSeconds: 0,
+    breatheElapsed: 0,
+    breatheExtended: false,
+    breathePaused: false,
+    breatheStartedAtMs: null,
+    breatheStartedAtElapsed: 0,
+    moveTimer: null,
+    moveSeconds: 0,
+    moveEndTime: null,
+  };
+}
+
+/* ============================================
+   PROTOCOL: START
+   ============================================ */
+function startProtocol() {
+  resetProto();
+  proto.startedAt = Date.now();
+  showProtoScreen('proto-intensity');
+  buildIntensityRow('intensityStartRow', 'start');
+}
+
+function showProtoScreen(id) {
+  document.querySelectorAll('.protocol-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function exitProtocol() {
+  // Save whatever we have so far
+  saveCraving();
+  closeAllProtocol();
+}
+
+function closeAllProtocol() {
+  if (proto.breatheTimer) clearInterval(proto.breatheTimer);
+  if (proto.moveTimer) clearInterval(proto.moveTimer);
+  document.querySelectorAll('.protocol-screen').forEach(s => s.classList.remove('active'));
+  renderToday();
+}
+
+/* ============================================
+   STEP 0: INTENSITY SNAPSHOT
+   ============================================ */
+function buildIntensityRow(containerId, type) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'intensity-btn';
+    btn.textContent = i;
+    btn.onclick = () => {
+      container.querySelectorAll('.intensity-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      if (type === 'start') {
+        proto.intensityStart = i;
+        // Auto-advance after a brief beat
+        setTimeout(() => goToMotivation(), 250);
+      } else {
+        proto.intensityEnd = i;
+        showReflectDelta();
+      }
+    };
+    container.appendChild(btn);
+  }
+}
+
+/* ============================================
+   STEP 1: MOTIVATION ANCHOR
+   ============================================ */
+const MOTIVATION_ANCHORS = [
+  "Cravings come in waves. This one's already cresting.",
+  "The next 15 minutes are the only ones that matter right now.",
+  "You're already doing the thing that works. Keep going for 15 minutes.",
+  "Cravings pass through you. They don't define you.",
+  "15 minutes from now you'll be on the other side of this.",
+  "Hunger waits patiently. A craving doesn't — it has to peak and fade.",
+  "You're not denying yourself. You're choosing what you actually want."
+];
+
+function goToMotivation() {
+  showProtoScreen('proto-motivation');
+  // Pick a random anchor
+  const idx = Math.floor(Math.random() * MOTIVATION_ANCHORS.length);
+  document.getElementById('motivationAnchor').textContent = MOTIVATION_ANCHORS[idx];
+}
+
+/* ============================================
+   STEP 2: BREATHE (4-7-8)
+   ============================================ */
+const BREATHE_PHASES = [
+  { label: 'Breathe in', seconds: 4, cssClass: 'inhale' },
+  { label: 'Hold', seconds: 7, cssClass: 'hold' },
+  { label: 'Breathe out', seconds: 8, cssClass: 'exhale' }
+];
+const BREATHE_CYCLE_SECONDS = 4 + 7 + 8; // 19s per cycle
+const BREATHE_DEFAULT_CYCLES = 6;  // ~114s ≈ 2 min
+const BREATHE_EXTEND_CYCLES = 3;   // ~57s ≈ 1 more min
+const BREATHE_READY_AFTER_CYCLES = 2; // Show "I'm ready" after 2 cycles (~38s)
+
+function goToBreathe() {
+  showProtoScreen('proto-breathe');
+  proto.breatheCycles = 0;
+  proto.breatheElapsed = 0;
+  proto.breatheExtended = false;
+  proto.breathePaused = false;
+  proto.breatheTotalSeconds = BREATHE_DEFAULT_CYCLES * BREATHE_CYCLE_SECONDS;
+
+  // Hide all action buttons initially
+  document.getElementById('breatheReady').classList.remove('visible');
+  document.getElementById('breatheMore').classList.remove('visible');
+  document.getElementById('breatheNext').classList.remove('visible');
+
+  const circle = document.getElementById('breatheCircle');
+  circle.className = 'breathe-circle';
+  document.getElementById('breatheLabel').textContent = 'Get ready';
+  document.getElementById('breatheCount').textContent = '';
+  document.getElementById('breatheTime').textContent = formatTime(proto.breatheTotalSeconds);
+  document.getElementById('breatheCycleCount').textContent = '';
+
+  // Start after a 2-second delay
+  setTimeout(() => {
+    if (!document.getElementById('proto-breathe').classList.contains('active')) return;
+    startBreatheLoop();
+  }, 2000);
+}
+
+function startBreatheLoop() {
+  // Wall-clock: store when this breathing session segment started
+  proto.breatheStartedAtMs = Date.now();
+  proto.breatheStartedAtElapsed = proto.breatheElapsed; // how many seconds were already elapsed before this segment
+
+  let phaseIndex = 0;
+  let phaseCountdown = BREATHE_PHASES[0].seconds;
+
+  enterBreathePhase(phaseIndex);
+  document.getElementById('breatheCount').textContent = phaseCountdown;
+
+  let lastTickSec = 0; // track which second we last processed
+
+  proto.breatheTimer = setInterval(() => {
+    if (proto.breathePaused) return;
+
+    // Wall-clock elapsed for this segment
+    const segmentElapsedMs = Date.now() - proto.breatheStartedAtMs;
+    const totalElapsed = proto.breatheStartedAtElapsed + Math.floor(segmentElapsedMs / 1000);
+
+    // Update overall remaining time (wall-clock accurate, catches up after screen wake)
+    const remaining = proto.breatheTotalSeconds - totalElapsed;
+    document.getElementById('breatheTime').textContent = formatTime(Math.max(0, remaining));
+
+    // Check if total time is up (wall-clock)
+    if (totalElapsed >= proto.breatheTotalSeconds) {
+      proto.breatheElapsed = proto.breatheTotalSeconds;
+      clearInterval(proto.breatheTimer);
+      proto.breatheTimer = null;
+      breatheComplete();
+      return;
+    }
+
+    // For the phase animation, advance one tick at a time
+    // Calculate how many ticks we should have processed
+    const segmentTicks = Math.floor(segmentElapsedMs / 1000);
+    if (segmentTicks <= lastTickSec) return; // no new tick yet
+
+    // Process missed ticks (handles screen-off catchup)
+    const ticksToProcess = segmentTicks - lastTickSec;
+    lastTickSec = segmentTicks;
+
+    for (let t = 0; t < ticksToProcess; t++) {
+      proto.breatheElapsed = proto.breatheStartedAtElapsed + (lastTickSec - ticksToProcess + t + 1);
+      phaseCountdown--;
+
+      if (phaseCountdown <= 0) {
+        phaseIndex++;
+        if (phaseIndex >= BREATHE_PHASES.length) {
+          phaseIndex = 0;
+          proto.breatheCycles++;
+          document.getElementById('breatheCycleCount').textContent =
+            `Cycle ${proto.breatheCycles}`;
+
+          if (proto.breatheCycles >= BREATHE_READY_AFTER_CYCLES) {
+            document.getElementById('breatheReady').classList.add('visible');
+          }
+        }
+
+        if (proto.breatheElapsed >= proto.breatheTotalSeconds) {
+          clearInterval(proto.breatheTimer);
+          proto.breatheTimer = null;
+          breatheComplete();
+          return;
+        }
+
+        phaseCountdown = BREATHE_PHASES[phaseIndex].seconds;
+      }
+    }
+
+    // Update display for current phase (snap to current state after catchup)
+    enterBreathePhase(phaseIndex);
+    document.getElementById('breatheCount').textContent = Math.max(0, phaseCountdown);
+  }, 250); // 4x/sec for snappier response after screen wake
+}
+
+function enterBreathePhase(index) {
+  const phase = BREATHE_PHASES[index];
+  const circle = document.getElementById('breatheCircle');
+  circle.className = 'breathe-circle ' + phase.cssClass;
+
+  // Reset transition for inhale (needs to grow)
+  if (phase.cssClass === 'inhale') {
+    circle.style.transition = `transform ${phase.seconds}s ease-in-out, border-color 0.5s`;
+  } else if (phase.cssClass === 'exhale') {
+    circle.style.transition = `transform ${phase.seconds}s ease-in-out, border-color 0.5s`;
+  } else {
+    circle.style.transition = 'border-color 0.5s';
+  }
+
+  document.getElementById('breatheLabel').textContent = phase.label;
+}
+
+function breatheComplete() {
+  proto.breathePaused = true;
+  if (proto.breatheTimer) { clearInterval(proto.breatheTimer); proto.breatheTimer = null; }
+
+  const circle = document.getElementById('breatheCircle');
+  circle.className = 'breathe-circle';
+  circle.style.transition = 'all 0.5s';
+  document.getElementById('breatheLabel').textContent = 'Well done';
+  document.getElementById('breatheCount').textContent = '';
+  document.getElementById('breatheTime').textContent = '';
+  document.getElementById('breatheCycleCount').textContent =
+    `${proto.breatheCycles} cycles completed`;
+
+  // Reset ALL buttons first, then show the right ones
+  document.getElementById('breatheReady').classList.remove('visible');
+  document.getElementById('breatheMore').classList.remove('visible');
+  document.getElementById('breatheNext').classList.remove('visible');
+
+  if (!proto.breatheExtended) {
+    // First completion — offer "More breathing" and "Next step"
+    document.getElementById('breatheMore').classList.add('visible');
+    document.getElementById('breatheNext').classList.add('visible');
+  } else {
+    // Extended session done — only show "Next step"
+    document.getElementById('breatheNext').classList.add('visible');
+  }
+}
+
+function breatheSkip() {
+  // "I'm ready" — move to Name It
+  if (proto.breatheTimer) clearInterval(proto.breatheTimer);
+  goToName();
+}
+
+function breatheExtend() {
+  // Add 3 more cycles
+  if (proto.breatheTimer) { clearInterval(proto.breatheTimer); proto.breatheTimer = null; }
+  proto.breatheExtended = true;
+  proto.breathePaused = false;
+  proto.breatheTotalSeconds = proto.breatheElapsed + (BREATHE_EXTEND_CYCLES * BREATHE_CYCLE_SECONDS);
+
+  // Hide all buttons during breathing, show "I'm ready" only
+  document.getElementById('breatheMore').classList.remove('visible');
+  document.getElementById('breatheNext').classList.remove('visible');
+  document.getElementById('breatheReady').classList.add('visible');
+
+  // Reset circle visual before restarting
+  const circle = document.getElementById('breatheCircle');
+  circle.className = 'breathe-circle';
+  circle.style.transition = 'none';
+
+  startBreatheLoop();
+}
+
+function breatheAdvance() {
+  // "Next step" after completion
+  goToName();
+}
+
+/* ============================================
+   STEP 2: NAME IT
+   ============================================ */
+function goToName() {
+  if (proto.breatheTimer) clearInterval(proto.breatheTimer);
+  showProtoScreen('proto-name');
+  buildTriggerChips();
+}
+
+function buildTriggerChips() {
+  const container = document.getElementById('triggerChips');
+  container.innerHTML = '';
+  const nextBtn = document.getElementById('nameNextBtn');
+  nextBtn.classList.remove('enabled');
+  const otherInput = document.getElementById('triggerOtherInput');
+  otherInput.classList.add('hidden');
+  otherInput.value = '';
+
+  TRIGGERS.forEach(t => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = t.label;
+    chip.onclick = () => {
+      container.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      proto.trigger = t.id;
+      proto.triggerCustom = null;
+      nextBtn.classList.add('enabled');
+
+      // Show/hide text input for "Other"
+      if (t.id === 'other') {
+        otherInput.classList.remove('hidden');
+        otherInput.focus();
+      } else {
+        otherInput.classList.add('hidden');
+        otherInput.value = '';
+      }
+    };
+    container.appendChild(chip);
+  });
+}
+
+function goToMove() {
+  if (!proto.trigger) return;
+  // Capture custom trigger text if "Other" was selected
+  if (proto.trigger === 'other') {
+    const customText = document.getElementById('triggerOtherInput').value.trim();
+    if (customText) proto.triggerCustom = customText;
+  }
+  showProtoScreen('proto-move');
+  buildActionChips();
+}
+
+/* ============================================
+   STEP 3: MOVE
+   ============================================ */
+function buildActionChips() {
+  const container = document.getElementById('actionChips');
+  container.innerHTML = '';
+  container.classList.remove('hidden');
+  document.getElementById('moveTimer').classList.add('hidden');
+  document.getElementById('moveInstruction').classList.add('hidden');
+  document.getElementById('moveSkipBtn').classList.add('hidden');
+
+  // Reset title and subtitle from any previous run
+  document.querySelector('#proto-move .protocol-title').textContent = 'Do one thing.';
+  const subtitle = document.querySelector('#proto-move .protocol-subtitle');
+  subtitle.textContent = 'Pick one and put the phone down.';
+  subtitle.classList.remove('hidden');
+
+  ACTIONS.forEach(a => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = a.label;
+    chip.onclick = () => {
+      proto.action = a.id;
+      container.classList.add('hidden');
+      document.querySelector('#proto-move .protocol-title').textContent = a.label;
+      document.querySelector('#proto-move .protocol-subtitle').classList.add('hidden');
+      startMoveTimer();
+    };
+    container.appendChild(chip);
+  });
+}
+
+function startMoveTimer() {
+  const MOVE_DURATION = 300; // 5 min in seconds
+  proto.moveEndTime = Date.now() + (MOVE_DURATION * 1000);
+  const display = document.getElementById('moveTimer');
+  const instruction = document.getElementById('moveInstruction');
+  const skipBtn = document.getElementById('moveSkipBtn');
+
+  display.classList.remove('hidden');
+  instruction.classList.remove('hidden');
+  skipBtn.classList.remove('hidden');
+  skipBtn.classList.add('enabled');
+
+  display.textContent = formatTime(MOVE_DURATION);
+
+  proto.moveTimer = setInterval(() => {
+    const remaining = Math.max(0, Math.ceil((proto.moveEndTime - Date.now()) / 1000));
+    display.textContent = formatTime(remaining);
+    if (remaining <= 0) {
+      clearInterval(proto.moveTimer);
+      goToReflect();
+    }
+  }, 250); // Check 4x/sec for snappier catchup on screen wake
+}
+
+function goToReflect() {
+  if (proto.moveTimer) clearInterval(proto.moveTimer);
+  showProtoScreen('proto-reflect');
+  buildIntensityRow('intensityEndRow', 'end');
+  document.getElementById('reflectDelta').classList.add('hidden');
+  document.getElementById('reflectNote').value = '';
+  document.getElementById('reflectFinishBtn').style.opacity = '0.3';
+  document.getElementById('reflectFinishBtn').style.pointerEvents = 'none';
+}
+
+/* ============================================
+   STEP 4: REFLECT
+   ============================================ */
+function showReflectDelta() {
+  const start = proto.intensityStart;
+  const end = proto.intensityEnd;
+  const delta = start - end;
+
+  const deltaEl = document.getElementById('reflectDelta');
+  const deltaNum = document.getElementById('reflectDeltaNum');
+
+  if (start != null && end != null) {
+    if (delta > 0) {
+      deltaNum.textContent = `−${delta}`;
+      deltaEl.style.background = 'var(--success-soft)';
+      deltaEl.style.borderColor = 'var(--success)';
+      deltaNum.style.color = 'var(--success)';
+      document.querySelector('.reflect-delta-label').textContent = 'intensity dropped';
+    } else if (delta === 0) {
+      deltaNum.textContent = '0';
+      deltaEl.style.background = 'var(--surface-2)';
+      deltaEl.style.borderColor = 'var(--border)';
+      deltaNum.style.color = 'var(--text-2)';
+      document.querySelector('.reflect-delta-label').textContent = 'no change — that happens';
+    } else {
+      deltaNum.textContent = `+${Math.abs(delta)}`;
+      deltaEl.style.background = 'var(--danger-soft)';
+      deltaEl.style.borderColor = 'var(--danger)';
+      deltaNum.style.color = 'var(--danger)';
+      document.querySelector('.reflect-delta-label').textContent = 'went up — you still stayed';
+    }
+    deltaEl.classList.remove('hidden');
+  }
+
+  // Enable finish button
+  document.getElementById('reflectFinishBtn').style.opacity = '1';
+  document.getElementById('reflectFinishBtn').style.pointerEvents = 'auto';
+}
+
+function finishProtocol() {
+  saveCraving();
+  closeAllProtocol();
+}
+
+/* ============================================
+   SAVE CRAVING
+   ============================================ */
+function saveCraving() {
+  if (!proto.startedAt) return;
+
+  const data = loadData();
+  const craving = {
+    id: 'c_' + proto.startedAt,
+    startedAt: proto.startedAt,
+    completedAt: Date.now(),
+    intensityStart: proto.intensityStart,
+    intensityEnd: proto.intensityEnd,
+    trigger: proto.trigger,
+    triggerCustom: proto.triggerCustom || null,
+    action: proto.action,
+    note: document.getElementById('reflectNote')?.value?.trim() || null,
+    stepsCompleted: []
+  };
+
+  if (proto.intensityStart != null) craving.stepsCompleted.push('intensity');
+  if (proto.breatheElapsed > 0) craving.stepsCompleted.push('breathe');
+  if (proto.trigger) craving.stepsCompleted.push('name');
+  if (proto.action) craving.stepsCompleted.push('move');
+  if (proto.intensityEnd != null) craving.stepsCompleted.push('reflect');
+
+  data.cravings.push(craving);
+  if (!data.startDate) data.startDate = new Date().toISOString();
+  saveData(data);
+}
+
+/* ============================================
+   JOURNAL
+   ============================================ */
+function renderJournal() {
+  const data = loadData();
+  const list = document.getElementById('journalList');
+
+  if (data.cravings.length === 0) {
+    list.innerHTML = '<div class="journal-empty">No cravings logged yet.<br>That\'s a good thing.</div>';
+    return;
+  }
+
+  const sorted = [...data.cravings].sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
+  list.innerHTML = sorted.map(c => {
+    let timeStr = '—';
+    if (c.startedAt != null) {
+      const date = new Date(c.startedAt);
+      if (!isNaN(date.getTime())) {
+        timeStr = date.toLocaleString(undefined, {
+          month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+        });
+      }
+    }
+
+    const triggerBase = TRIGGERS.find(t => t.id === c.trigger)?.label || '—';
+    const triggerLabel = (c.trigger === 'other' && c.triggerCustom) ? `Other: ${escHtml(c.triggerCustom)}` : triggerBase;
+    const actionLabel = ACTIONS.find(a => a.id === c.action)?.label || '';
+
+    let intensityTag = '';
+    if (c.intensityStart != null && c.intensityEnd != null) {
+      const drop = c.intensityStart - c.intensityEnd;
+      const cls = drop > 0 ? 'dropped' : 'same';
+      const text = drop > 0 ? `${c.intensityStart} → ${c.intensityEnd}` :
+                   drop === 0 ? `stayed at ${c.intensityStart}` :
+                   `${c.intensityStart} → ${c.intensityEnd}`;
+      intensityTag = `<span class="journal-entry-intensity ${cls}">${text}</span>`;
+    } else if (c.intensityStart != null) {
+      intensityTag = `<span class="journal-entry-intensity same">started at ${c.intensityStart}</span>`;
+    }
+
+    return `
+      <div class="journal-entry">
+        <div class="journal-entry-header">
+          <span class="journal-entry-time">${timeStr}</span>
+          ${intensityTag}
+        </div>
+        <div class="journal-entry-trigger">${triggerLabel}</div>
+        ${actionLabel ? `<div class="journal-entry-actions">Did: ${actionLabel}</div>` : ''}
+        ${c.note ? `<div class="journal-entry-note">${escHtml(c.note)}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============================================
+   TRACKER / PATTERNS
+   ============================================ */
+function renderTracker() {
+  const data = loadData();
+  const cravings = data.cravings;
+
+  document.getElementById('trackerTotal').textContent = cravings.length;
+  document.getElementById('trackerSurvived').textContent =
+    cravings.filter(c => c.stepsCompleted && c.stepsCompleted.includes('reflect')).length;
+
+  // Total smoke-free days (all time)
+  const totalSober = Object.values(data.dayLogs).filter(v => v === 'sober').length;
+  document.getElementById('trackerSmokeFree').textContent = totalSober;
+
+  // Triggers
+  const triggerCounts = {};
+  cravings.forEach(c => {
+    if (c.trigger) triggerCounts[c.trigger] = (triggerCounts[c.trigger] || 0) + 1;
+  });
+  renderBarChart('trackerTriggers', triggerCounts, TRIGGERS);
+
+  // Actions
+  const actionCounts = {};
+  cravings.forEach(c => {
+    if (c.action) actionCounts[c.action] = (actionCounts[c.action] || 0) + 1;
+  });
+  renderBarChart('trackerActions', actionCounts, ACTIONS);
+}
+
+function renderBarChart(containerId, counts, items) {
+  const container = document.getElementById(containerId);
+  const max = Math.max(1, ...Object.values(counts));
+
+  const sorted = items
+    .filter(item => counts[item.id])
+    .sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0));
+
+  if (sorted.length === 0) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--text-3);">No data yet.</div>';
+    return;
+  }
+
+  container.innerHTML = sorted.map(item => {
+    const count = counts[item.id] || 0;
+    const pct = (count / max * 100).toFixed(0);
+    return `
+      <div class="tracker-bar-row">
+        <span class="tracker-bar-label">${item.label}</span>
+        <div class="tracker-bar"><div class="tracker-bar-fill" style="width:${pct}%"></div></div>
+        <span class="tracker-bar-count">${count}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============================================
+   EXPORT / RESET
+   ============================================ */
+function exportData() {
+  const data = loadData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `brokethecycle-food-export-${getToday()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function confirmReset() {
+  if (confirm('This will delete all your data. This cannot be undone. Are you sure?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+}
+
+/* ============================================
+   UTILITY
+   ============================================ */
+function formatTime(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/* ============================================
+   INIT
+   ============================================ */
+migrateV1();
+renderToday();
+
+</script>
+</body>
+</html>
